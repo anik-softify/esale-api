@@ -14,6 +14,8 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:8080
+      Infrastructure__RunDbInitialization: "true"
+      Infrastructure__RunHangfireServer: "true"
       ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=${MYSQL_DATABASE};User=${MYSQL_USER};Password=${MYSQL_PASSWORD};
       ConnectionStrings__Redis: redis:6379
       Seq__ServerUrl: http://seq:5341
@@ -36,6 +38,8 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:8080
+      Infrastructure__RunDbInitialization: "false"
+      Infrastructure__RunHangfireServer: "false"
       ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=${MYSQL_DATABASE};User=${MYSQL_USER};Password=${MYSQL_PASSWORD};
       ConnectionStrings__Redis: redis:6379
       Seq__ServerUrl: http://seq:5341

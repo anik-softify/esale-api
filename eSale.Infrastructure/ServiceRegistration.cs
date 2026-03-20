@@ -17,6 +17,7 @@ public static class ServiceRegistration
 {
     public static IServiceCollection AddInfrastructureProduction(this IServiceCollection services, IConfiguration configuration)
     {
+        var runHangfireServer = configuration.GetValue("Infrastructure:RunHangfireServer", true);
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException(
                 "Database connection string 'DefaultConnection' is missing. " +
@@ -42,7 +43,6 @@ public static class ServiceRegistration
             .UseRecommendedSerializerSettings()
             .UseStorage(new MySqlStorage(connectionString, new MySqlStorageOptions
             {
-                TablePrefix = "Hangfire",
                 QueuePollInterval = TimeSpan.FromSeconds(15),
                 JobExpirationCheckInterval = TimeSpan.FromHours(1),
                 CountersAggregateInterval = TimeSpan.FromMinutes(5),
@@ -51,7 +51,10 @@ public static class ServiceRegistration
                 TransactionTimeout = TimeSpan.FromMinutes(1)
             })));
 
-        services.AddHangfireServer();
+        if (runHangfireServer)
+        {
+            services.AddHangfireServer();
+        }
 
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<DbInitializer>();

@@ -17,8 +17,12 @@ public class TenantProvider : ITenantProvider
 
     public Guid GetTenantId()
     {
-        var context = _httpContextAccessor.HttpContext
-            ?? throw new InvalidOperationException("No active HTTP context.");
+        var context = _httpContextAccessor.HttpContext;
+
+        // Allow app startup tasks such as migrations to create the DbContext
+        // before an HTTP request exists.
+        if (context is null)
+            return Guid.Empty;
 
         if (context.Items.TryGetValue("TenantId", out var tenantObj) && tenantObj is Guid tenantId)
             return tenantId;

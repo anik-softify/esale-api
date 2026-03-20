@@ -7,6 +7,7 @@ using Hangfire;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+var runDbInitialization = builder.Configuration.GetValue("Infrastructure:RunDbInitialization", true);
 
 builder.Host.UseSerilog((context, services, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration)
@@ -30,8 +31,9 @@ builder.Services.AddScoped<ITenantProvider, TenantProvider>();
 
 var app = builder.Build();
 
-await using (var scope = app.Services.CreateAsyncScope())
+if (runDbInitialization)
 {
+    await using var scope = app.Services.CreateAsyncScope();
     var dbInitializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
     await dbInitializer.ApplyMigrationsAsync();
 }
