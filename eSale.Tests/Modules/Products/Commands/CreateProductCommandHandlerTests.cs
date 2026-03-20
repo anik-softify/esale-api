@@ -3,6 +3,7 @@ using eSale.Application.Common.Interfaces;
 using eSale.Application.Common.Mappings;
 using eSale.Application.Modules.Products.Commands;
 using eSale.Application.Common.Caching;
+using eSale.Domain.Common.Interfaces;
 using eSale.Domain.Modules.Products.Entities;
 using eSale.Domain.Modules.Products.Interfaces;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -29,6 +30,7 @@ public sealed class CreateProductCommandHandlerTests
         var repositoryMock = new Mock<IProductRepository>();
         var tenantProviderMock = new Mock<ITenantProvider>();
         var cacheServiceMock = new Mock<ICacheService>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
         var tenantId = Guid.NewGuid();
         Product? capturedProduct = null;
 
@@ -37,18 +39,19 @@ public sealed class CreateProductCommandHandlerTests
             .Setup(repository => repository.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()))
             .Callback<Product, CancellationToken>((product, _) => capturedProduct = product)
             .Returns(Task.CompletedTask);
-        repositoryMock
-            .Setup(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
         cacheServiceMock
             .Setup(cache => cache.RemoveAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
+        unitOfWorkMock
+            .Setup(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
 
         var handler = new CreateProductCommandHandler(
             repositoryMock.Object,
             tenantProviderMock.Object,
             _mapper,
-            cacheServiceMock.Object);
+            cacheServiceMock.Object,
+            unitOfWorkMock.Object);
 
         var command = new CreateProductCommand(
             "Gaming Laptop",
@@ -70,7 +73,7 @@ public sealed class CreateProductCommandHandlerTests
         Assert.Equal(command.StockQuantity, capturedProduct.StockQuantity);
 
         repositoryMock.Verify(repository => repository.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()), Times.Once);
-        repositoryMock.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         cacheServiceMock.Verify(cache => cache.RemoveAsync("products:list", It.IsAny<CancellationToken>()), Times.Once);
     }
 }

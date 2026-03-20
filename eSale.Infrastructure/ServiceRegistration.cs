@@ -1,5 +1,6 @@
 using eSale.Application.Common.BackgroundJobs;
 using eSale.Application.Common.Caching;
+using eSale.Domain.Common.Interfaces;
 using eSale.Domain.Modules.Products.Interfaces;
 using eSale.Infrastructure.BackgroundJobs;
 using eSale.Infrastructure.Caching;
@@ -60,6 +61,7 @@ public static class ServiceRegistration
         }
 
         services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<DbInitializer>();
         services.AddScoped<ICacheService, RedisCacheService>();
         services.AddScoped<IEmailJobService, EmailJobService>();

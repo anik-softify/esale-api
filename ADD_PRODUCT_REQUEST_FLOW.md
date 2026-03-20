@@ -108,8 +108,9 @@ Inside the handler:
 2. `Id = Guid.NewGuid()`
 3. tenant id comes from `ITenantProvider`
 4. `IsActive = true`
-5. repository saves the product
-6. cache invalidation happens
+5. repository stages the product for insert
+6. `IUnitOfWork` commits the transaction
+7. cache invalidation happens
 
 ### 7. Tenant provider is used
 
@@ -145,7 +146,20 @@ Generic repository pieces:
 - [IGenericRepository.cs](e:\eSale\eSale-api\eSale.Domain\Common\Interfaces\IGenericRepository.cs#L5)
 - [GenericRepository.cs](e:\eSale\eSale-api\eSale.Infrastructure\Persistence\Repositories\GenericRepository.cs#L31)
 
-### 9. DbContext is hit
+### 9. Unit of Work commits
+
+Files:
+
+- [IUnitOfWork.cs](e:\eSale\eSale-api\eSale.Domain\Common\Interfaces\IUnitOfWork.cs#L3)
+- [UnitOfWork.cs](e:\eSale\eSale-api\eSale.Infrastructure\Persistence\UnitOfWork.cs#L5)
+
+Meaning:
+
+- repository only handles data access
+- `IUnitOfWork` is the explicit commit boundary
+- this keeps transaction control in one place
+
+### 10. DbContext is hit
 
 Repository eventually uses:
 
@@ -157,7 +171,7 @@ Here EF Core:
 - prepares SQL
 - saves data into MySQL
 
-### 10. Domain entity is used
+### 11. Domain entity is used
 
 Entity:
 
@@ -167,7 +181,7 @@ Base entity:
 
 - [BaseEntity.cs](e:\eSale\eSale-api\eSale.Domain\Common\BaseEntity.cs#L6)
 
-### 11. Table configuration is applied
+### 12. Table configuration is applied
 
 Entity configuration file:
 
@@ -175,7 +189,7 @@ Entity configuration file:
 
 This helps EF Core map the entity correctly to the `Products` table.
 
-### 12. Response returns back
+### 13. Response returns back
 
 After save:
 
@@ -184,7 +198,7 @@ After save:
 
 Return flow:
 
-`DbContext -> Repository -> Handler -> MediatR -> Controller -> HTTP Response`
+`DbContext -> UnitOfWork -> Handler -> MediatR -> Controller -> HTTP Response`
 
 ## Short One-Line Flow
 
@@ -199,6 +213,7 @@ HTTP Request
 -> CreateProductCommandValidator
 -> CreateProductCommandHandler
 -> ProductRepository / GenericRepository
+-> UnitOfWork
 -> AppDbContext
 -> MySQL
 -> back to Handler
@@ -234,7 +249,9 @@ Request
 11. [ProductRepository.cs](e:\eSale\eSale-api\eSale.Infrastructure\Modules\Products\ProductRepository.cs#L9)
 12. [IGenericRepository.cs](e:\eSale\eSale-api\eSale.Domain\Common\Interfaces\IGenericRepository.cs#L5)
 13. [GenericRepository.cs](e:\eSale\eSale-api\eSale.Infrastructure\Persistence\Repositories\GenericRepository.cs#L31)
-14. [AppDbContext.cs](e:\eSale\eSale-api\eSale.Infrastructure\Persistence\AppDbContext.cs#L32)
-15. [Product.cs](e:\eSale\eSale-api\eSale.Domain\Modules\Products\Entities\Product.cs#L5)
-16. [BaseEntity.cs](e:\eSale\eSale-api\eSale.Domain\Common\BaseEntity.cs#L6)
-17. [ProductConfiguration.cs](e:\eSale\eSale-api\eSale.Infrastructure\Persistence\Configurations\ProductConfiguration.cs#L9)
+14. [IUnitOfWork.cs](e:\eSale\eSale-api\eSale.Domain\Common\Interfaces\IUnitOfWork.cs#L3)
+15. [UnitOfWork.cs](e:\eSale\eSale-api\eSale.Infrastructure\Persistence\UnitOfWork.cs#L5)
+16. [AppDbContext.cs](e:\eSale\eSale-api\eSale.Infrastructure\Persistence\AppDbContext.cs#L32)
+17. [Product.cs](e:\eSale\eSale-api\eSale.Domain\Modules\Products\Entities\Product.cs#L5)
+18. [BaseEntity.cs](e:\eSale\eSale-api\eSale.Domain\Common\BaseEntity.cs#L6)
+19. [ProductConfiguration.cs](e:\eSale\eSale-api\eSale.Infrastructure\Persistence\Configurations\ProductConfiguration.cs#L9)

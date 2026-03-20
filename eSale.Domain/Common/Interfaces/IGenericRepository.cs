@@ -9,5 +9,4 @@ public interface IGenericRepository<T> where T : BaseEntity
     Task AddAsync(T entity, CancellationToken cancellationToken = default);
     void Update(T entity);
     void Remove(T entity);
-    Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

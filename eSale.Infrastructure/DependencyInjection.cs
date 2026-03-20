@@ -1,3 +1,4 @@
+using eSale.Domain.Common.Interfaces;
 using eSale.Domain.Modules.Products.Interfaces;
 using eSale.Infrastructure.Modules.Products;
 using eSale.Infrastructure.Persistence;
@@ -21,6 +22,7 @@ public static class DependencyInjection
 
         // Register repositories — one line per module, easy to find
         services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<DbInitializer>();
 
         return services;

@@ -42,9 +42,4 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     {
         DbSet.Remove(entity);
     }
-
-    public virtual async Task SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        await DbContext.SaveChangesAsync(cancellationToken);
-    }
 }
