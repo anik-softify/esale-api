@@ -1,4 +1,5 @@
 using AutoMapper;
+using eSale.Application.Common.Caching;
 using eSale.Application.Common.Interfaces;
 using eSale.Domain.Modules.Products.Entities;
 using eSale.Domain.Modules.Products.Interfaces;
@@ -20,15 +21,18 @@ public sealed class CreateProductCommandHandler : IRequestHandler<CreateProductC
     private readonly IProductRepository _productRepository;
     private readonly ITenantProvider _tenantProvider;
     private readonly IMapper _mapper;
+    private readonly ICacheService _cacheService;
 
     public CreateProductCommandHandler(
         IProductRepository productRepository,
         ITenantProvider tenantProvider,
-        IMapper mapper)
+        IMapper mapper,
+        ICacheService cacheService)
     {
         _productRepository = productRepository;
         _tenantProvider = tenantProvider;
         _mapper = mapper;
+        _cacheService = cacheService;
     }
 
     public async Task<Guid> Handle(CreateProductCommand request, CancellationToken cancellationToken)
@@ -40,6 +44,7 @@ public sealed class CreateProductCommandHandler : IRequestHandler<CreateProductC
 
         await _productRepository.AddAsync(product, cancellationToken);
         await _productRepository.SaveChangesAsync(cancellationToken);
+        await _cacheService.RemoveAsync("products:list", cancellationToken);
 
         return product.Id;
     }

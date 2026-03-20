@@ -11,13 +11,17 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException(
+                "Database connection string 'DefaultConnection' is missing. " +
+                "Set it via environment variable 'ConnectionStrings__DefaultConnection'.");
 
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseMySQL(connectionString!));
+        services.AddDbContextPool<AppDbContext>(options =>
+            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
         // Register repositories — one line per module, easy to find
         services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<DbInitializer>();
 
         return services;
     }

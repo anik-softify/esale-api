@@ -1,4 +1,5 @@
 using AutoMapper;
+using eSale.Application.Common.Caching;
 using eSale.Application.Modules.Products.DTOs;
 using eSale.Domain.Modules.Products.Interfaces;
 using MediatR;
@@ -6,7 +7,11 @@ using MediatR;
 namespace eSale.Application.Modules.Products.Queries;
 
 // --- Query (the request) ---
-public sealed record GetProductListQuery : IRequest<IReadOnlyList<ProductDto>>;
+public sealed record GetProductListQuery : IRequest<IReadOnlyList<ProductDto>>, ICacheableQuery
+{
+    public string CacheKey => "products:list";
+    public TimeSpan Expiration => TimeSpan.FromMinutes(2);
+}
 
 // --- Handler (the use case) ---
 public sealed class GetProductListQueryHandler : IRequestHandler<GetProductListQuery, IReadOnlyList<ProductDto>>

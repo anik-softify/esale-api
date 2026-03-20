@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.idea/
+**/.vscode/
+**/TestResults/
+**/logs/
+**/*.user
+**/*.suo
+**/*.log
+.git
+.gitignore
+docker-compose*.yml
+README-DEPLOYMENT.md

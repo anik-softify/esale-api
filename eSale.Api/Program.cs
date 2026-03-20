@@ -2,6 +2,8 @@ using eSale.Api.Middleware;
 using eSale.Application;
 using eSale.Application.Common.Interfaces;
 using eSale.Infrastructure;
+using eSale.Infrastructure.Persistence;
+using Hangfire;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,10 +17,12 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
         path: "logs/esale-.log",
         rollingInterval: RollingInterval.Day,
         retainedFileCountLimit: 14,
-        shared: true));
+        shared: true)
+    .WriteTo.Seq(
+        serverUrl: context.Configuration["Seq:ServerUrl"] ?? "http://seq:5341"));
 
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructureProduction(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
@@ -26,10 +30,17 @@ builder.Services.AddScoped<ITenantProvider, TenantProvider>();
 
 var app = builder.Build();
 
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var dbInitializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
+    await dbInitializer.ApplyMigrationsAsync();
+}
+
 app.UseSerilogRequestLogging();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseMiddleware<TenantMiddleware>();
 app.UseHttpsRedirection();
+app.UseHangfireDashboard("/hangfire");
 app.MapControllers();
 
 app.Run();

@@ -2,6 +2,7 @@ using AutoMapper;
 using eSale.Application.Common.Interfaces;
 using eSale.Application.Common.Mappings;
 using eSale.Application.Modules.Products.Commands;
+using eSale.Application.Common.Caching;
 using eSale.Domain.Modules.Products.Entities;
 using eSale.Domain.Modules.Products.Interfaces;
 using Moq;
@@ -24,6 +25,7 @@ public sealed class CreateProductCommandHandlerTests
     {
         var repositoryMock = new Mock<IProductRepository>();
         var tenantProviderMock = new Mock<ITenantProvider>();
+        var cacheServiceMock = new Mock<ICacheService>();
         var tenantId = Guid.NewGuid();
         Product? capturedProduct = null;
 
@@ -35,11 +37,15 @@ public sealed class CreateProductCommandHandlerTests
         repositoryMock
             .Setup(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
+        cacheServiceMock
+            .Setup(cache => cache.RemoveAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         var handler = new CreateProductCommandHandler(
             repositoryMock.Object,
             tenantProviderMock.Object,
-            _mapper);
+            _mapper,
+            cacheServiceMock.Object);
 
         var command = new CreateProductCommand(
             "Gaming Laptop",
@@ -62,5 +68,6 @@ public sealed class CreateProductCommandHandlerTests
 
         repositoryMock.Verify(repository => repository.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()), Times.Once);
         repositoryMock.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        cacheServiceMock.Verify(cache => cache.RemoveAsync("products:list", It.IsAny<CancellationToken>()), Times.Once);
     }
 }
