@@ -1,13 +1,17 @@
 using eSale.Application.Common.BackgroundJobs;
 using eSale.Application.Common.Caching;
+using eSale.Application.Common.Interfaces;
 using eSale.Domain.Common.Interfaces;
+using eSale.Domain.Modules.Auth.Entities;
 using eSale.Domain.Modules.Products.Interfaces;
 using eSale.Infrastructure.BackgroundJobs;
 using eSale.Infrastructure.Caching;
+using eSale.Infrastructure.Modules.Auth;
 using eSale.Infrastructure.Modules.Products;
 using eSale.Infrastructure.Persistence;
 using Hangfire;
 using Hangfire.MySql;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,11 +64,24 @@ public static class DependencyInjection
             services.AddHangfireServer();
         }
 
+        services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+        {
+            options.Password.RequireDigit = true;
+            options.Password.RequiredLength = 6;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireLowercase = true;
+            options.User.RequireUniqueEmail = true;
+        })
+        .AddEntityFrameworkStores<AppDbContext>()
+        .AddDefaultTokenProviders();
+
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<DbInitializer>();
         services.AddScoped<ICacheService, RedisCacheService>();
         services.AddScoped<IEmailJobService, EmailJobService>();
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
 
         return services;
     }

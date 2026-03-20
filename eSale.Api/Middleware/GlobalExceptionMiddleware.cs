@@ -50,6 +50,12 @@ public sealed class GlobalExceptionMiddleware
                 Message = notFoundException.Message,
                 TraceId = context.TraceIdentifier
             },
+            UnauthorizedAccessException unauthorizedException => new ApiExceptionResponse
+            {
+                StatusCode = StatusCodes.Status401Unauthorized,
+                Message = unauthorizedException.Message,
+                TraceId = context.TraceIdentifier
+            },
             BadHttpRequestException badHttpRequestException => new ApiExceptionResponse
             {
                 StatusCode = StatusCodes.Status400BadRequest,

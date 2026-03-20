@@ -1,11 +1,13 @@
 using eSale.Application.Common.Interfaces;
 using eSale.Domain.Common;
+using eSale.Domain.Modules.Auth.Entities;
 using eSale.Domain.Modules.Products.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace eSale.Infrastructure.Persistence;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<ApplicationUser>
 {
     private readonly Guid _tenantId;
 
