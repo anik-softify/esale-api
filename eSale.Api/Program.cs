@@ -8,19 +8,26 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 var runDbInitialization = builder.Configuration.GetValue("Infrastructure:RunDbInitialization", true);
+var seqServerUrl = builder.Configuration["Seq:ServerUrl"];
 
-builder.Host.UseSerilog((context, services, configuration) => configuration
-    .ReadFrom.Configuration(context.Configuration)
-    .ReadFrom.Services(services)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.File(
-        path: "logs/esale-.log",
-        rollingInterval: RollingInterval.Day,
-        retainedFileCountLimit: 14,
-        shared: true)
-    .WriteTo.Seq(
-        serverUrl: context.Configuration["Seq:ServerUrl"] ?? "http://seq:5341"));
+builder.Host.UseSerilog((context, services, configuration) =>
+{
+    configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext()
+        .WriteTo.Console()
+        .WriteTo.File(
+            path: "logs/esale-.log",
+            rollingInterval: RollingInterval.Day,
+            retainedFileCountLimit: 14,
+            shared: true);
+
+    if (!string.IsNullOrWhiteSpace(seqServerUrl))
+    {
+        configuration.WriteTo.Seq(serverUrl: seqServerUrl);
+    }
+});
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructureProduction(builder.Configuration);

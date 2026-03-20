@@ -16,7 +16,7 @@ WORKDIR /app
 
 RUN addgroup -S esale && adduser -S esale -G esale
 
-ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_URLS=http://+:5000
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 COPY --from=build /app/publish .
@@ -24,6 +24,6 @@ COPY --from=build /app/publish .
 RUN chown -R esale:esale /app
 USER esale
 
-EXPOSE 8080
+EXPOSE 5000
 
 ENTRYPOINT ["dotnet", "eSale.Api.dll"]

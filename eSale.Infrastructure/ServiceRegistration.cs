@@ -22,20 +22,23 @@ public static class ServiceRegistration
             ?? throw new InvalidOperationException(
                 "Database connection string 'DefaultConnection' is missing. " +
                 "Set it via environment variable 'ConnectionStrings__DefaultConnection'.");
-
-        var redisConnectionString = configuration.GetConnectionString("Redis")
-            ?? throw new InvalidOperationException(
-                "Redis connection string 'Redis' is missing. " +
-                "Set it via environment variable 'ConnectionStrings__Redis'.");
+        var redisConnectionString = configuration.GetConnectionString("Redis");
 
         services.AddDbContextPool<AppDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-        services.AddStackExchangeRedisCache(options =>
+        if (string.IsNullOrWhiteSpace(redisConnectionString))
         {
-            options.Configuration = redisConnectionString;
-            options.InstanceName = "esale:";
-        });
+            services.AddDistributedMemoryCache();
+        }
+        else
+        {
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConnectionString;
+                options.InstanceName = "esale:";
+            });
+        }
 
         services.AddHangfire(configurationBuilder => configurationBuilder
             .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
