@@ -1,0 +1,17 @@
+E:\eSale\eSale.Infrastructure\bin\Debug\net10.0\eSale.Infrastructure.deps.json
+E:\eSale\eSale.Infrastructure\bin\Debug\net10.0\eSale.Infrastructure.dll
+E:\eSale\eSale.Infrastructure\bin\Debug\net10.0\eSale.Infrastructure.pdb
+E:\eSale\eSale.Infrastructure\bin\Debug\net10.0\eSale.Application.dll
+E:\eSale\eSale.Infrastructure\bin\Debug\net10.0\eSale.Domain.dll
+E:\eSale\eSale.Infrastructure\bin\Debug\net10.0\eSale.Application.pdb
+E:\eSale\eSale.Infrastructure\bin\Debug\net10.0\eSale.Domain.pdb
+E:\eSale\eSale.Infrastructure\obj\Debug\net10.0\eSale.Infrastructure.csproj.AssemblyReference.cache
+E:\eSale\eSale.Infrastructure\obj\Debug\net10.0\eSale.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+E:\eSale\eSale.Infrastructure\obj\Debug\net10.0\eSale.Infrastructure.AssemblyInfoInputs.cache
+E:\eSale\eSale.Infrastructure\obj\Debug\net10.0\eSale.Infrastructure.AssemblyInfo.cs
+E:\eSale\eSale.Infrastructure\obj\Debug\net10.0\eSale.Infrastructure.csproj.CoreCompileInputs.cache
+E:\eSale\eSale.Infrastructure\obj\Debug\net10.0\eSale.In.AE89A0E3.Up2Date
+E:\eSale\eSale.Infrastructure\obj\Debug\net10.0\eSale.Infrastructure.dll
+E:\eSale\eSale.Infrastructure\obj\Debug\net10.0\refint\eSale.Infrastructure.dll
+E:\eSale\eSale.Infrastructure\obj\Debug\net10.0\eSale.Infrastructure.pdb
+E:\eSale\eSale.Infrastructure\obj\Debug\net10.0\ref\eSale.Infrastructure.dll

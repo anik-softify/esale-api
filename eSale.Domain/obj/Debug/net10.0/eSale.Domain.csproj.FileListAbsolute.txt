@@ -1,0 +1,11 @@
+E:\eSale\eSale.Domain\bin\Debug\net10.0\eSale.Domain.deps.json
+E:\eSale\eSale.Domain\bin\Debug\net10.0\eSale.Domain.dll
+E:\eSale\eSale.Domain\bin\Debug\net10.0\eSale.Domain.pdb
+E:\eSale\eSale.Domain\obj\Debug\net10.0\eSale.Domain.GeneratedMSBuildEditorConfig.editorconfig
+E:\eSale\eSale.Domain\obj\Debug\net10.0\eSale.Domain.AssemblyInfoInputs.cache
+E:\eSale\eSale.Domain\obj\Debug\net10.0\eSale.Domain.AssemblyInfo.cs
+E:\eSale\eSale.Domain\obj\Debug\net10.0\eSale.Domain.csproj.CoreCompileInputs.cache
+E:\eSale\eSale.Domain\obj\Debug\net10.0\eSale.Domain.dll
+E:\eSale\eSale.Domain\obj\Debug\net10.0\refint\eSale.Domain.dll
+E:\eSale\eSale.Domain\obj\Debug\net10.0\eSale.Domain.pdb
+E:\eSale\eSale.Domain\obj\Debug\net10.0\ref\eSale.Domain.dll
