@@ -1,8 +1,8 @@
 using AutoMapper;
-using eSale.Application.Common.Interfaces;
-using eSale.Application.Common.Mappings;
-using eSale.Application.Modules.Products.Commands;
 using eSale.Application.Common.Caching;
+using eSale.Application.Common.Interfaces;
+using eSale.Application.Modules.Products.Commands;
+using eSale.Application.Modules.Products.Mappings;
 using eSale.Domain.Common.Interfaces;
 using eSale.Domain.Modules.Products.Entities;
 using eSale.Domain.Modules.Products.Interfaces;

@@ -3,7 +3,7 @@ using eSale.Application.Modules.Products.Commands;
 using eSale.Application.Modules.Products.DTOs;
 using eSale.Domain.Modules.Products.Entities;
 
-namespace eSale.Application.Common.Mappings;
+namespace eSale.Application.Modules.Products.Mappings;
 
 public sealed class ProductProfile : Profile
 {

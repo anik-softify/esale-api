@@ -30,7 +30,7 @@ builder.Host.UseSerilog((context, services, configuration) =>
 });
 
 builder.Services.AddApplication();
-builder.Services.AddInfrastructureProduction(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
