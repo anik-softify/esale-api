@@ -24,7 +24,7 @@ public static class ServiceRegistration
                 "Set it via environment variable 'ConnectionStrings__DefaultConnection'.");
         var redisConnectionString = configuration.GetConnectionString("Redis");
 
-        services.AddDbContextPool<AppDbContext>(options =>
+        services.AddDbContext<AppDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
         if (string.IsNullOrWhiteSpace(redisConnectionString))

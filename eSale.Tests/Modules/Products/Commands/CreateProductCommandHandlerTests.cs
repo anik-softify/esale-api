@@ -5,6 +5,7 @@ using eSale.Application.Modules.Products.Commands;
 using eSale.Application.Common.Caching;
 using eSale.Domain.Modules.Products.Entities;
 using eSale.Domain.Modules.Products.Interfaces;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
@@ -16,7 +17,9 @@ public sealed class CreateProductCommandHandlerTests
 
     public CreateProductCommandHandlerTests()
     {
-        var configuration = new MapperConfiguration(cfg => cfg.AddProfile<ProductProfile>());
+        var configuration = new MapperConfiguration(
+            cfg => cfg.AddProfile<ProductProfile>(),
+            NullLoggerFactory.Instance);
         _mapper = configuration.CreateMapper();
     }
 
