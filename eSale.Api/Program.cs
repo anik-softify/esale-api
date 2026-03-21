@@ -66,15 +66,21 @@ var app = builder.Build();
 if (runDbInitialization)
 {
     await using var scope = app.Services.CreateAsyncScope();
+
+    // Initialize central database (Identity + Tenant registry)
     var dbInitializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
     await dbInitializer.ApplyMigrationsAsync();
+
+    // Initialize all existing tenant databases
+    var tenantDbInitializer = scope.ServiceProvider.GetRequiredService<TenantDbInitializer>();
+    await tenantDbInitializer.InitializeAllTenantsAsync();
 }
 
 app.UseSerilogRequestLogging();
 app.UseMiddleware<GlobalExceptionMiddleware>();
-app.UseMiddleware<TenantMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
+app.UseMiddleware<TenantMiddleware>();
 app.UseAuthorization();
 app.UseHangfireDashboard("/hangfire");
 app.MapControllers();

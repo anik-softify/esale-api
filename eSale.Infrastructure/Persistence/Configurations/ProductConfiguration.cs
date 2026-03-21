@@ -26,11 +26,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.Price)
             .HasPrecision(18, 2);
 
-        // Composite index: TenantId + Sku must be unique within a tenant
-        builder.HasIndex(p => new { p.TenantId, p.Sku })
-            .IsUnique();
-
-        // Index for tenant-scoped queries
-        builder.HasIndex(p => p.TenantId);
+        // SKU is unique within each tenant database
+        builder.HasIndex(p => p.Sku).IsUnique();
     }
 }

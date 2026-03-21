@@ -4,10 +4,12 @@ using eSale.Application.Common.Interfaces;
 using eSale.Domain.Common.Interfaces;
 using eSale.Domain.Modules.Auth.Entities;
 using eSale.Domain.Modules.Products.Interfaces;
+using eSale.Domain.Modules.Tenants.Interfaces;
 using eSale.Infrastructure.BackgroundJobs;
 using eSale.Infrastructure.Caching;
 using eSale.Infrastructure.Modules.Auth;
 using eSale.Infrastructure.Modules.Products;
+using eSale.Infrastructure.Modules.Tenants;
 using eSale.Infrastructure.Persistence;
 using Hangfire;
 using Hangfire.MySql;
@@ -29,9 +31,47 @@ public static class DependencyInjection
                 "Set it via environment variable 'ConnectionStrings__DefaultConnection'.");
         var redisConnectionString = configuration.GetConnectionString("Redis");
 
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+        // Detect MySQL server version once for reuse
+        var serverVersion = ServerVersion.AutoDetect(connectionString);
 
+        // Central database: Tenant registry + Hangfire only
+        services.AddDbContext<CentralDbContext>(options =>
+            options.UseMySql(connectionString, serverVersion));
+
+        // Tenant database: dynamic connection per request (includes Identity tables)
+        services.AddScoped<AppDbContext>(sp =>
+        {
+            var tenantProvider = sp.GetRequiredService<ITenantProvider>();
+            var connStr = tenantProvider.GetConnectionString();
+
+            if (string.IsNullOrWhiteSpace(connStr))
+            {
+                throw new InvalidOperationException(
+                    "Tenant connection string is required for AppDbContext. " +
+                    "Ensure the request has a valid tenant context.");
+            }
+
+            var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+            optionsBuilder.UseMySql(connStr, serverVersion);
+
+            return new AppDbContext(optionsBuilder.Options, tenantProvider);
+        });
+
+        // Identity now uses tenant-scoped AppDbContext
+        // Email uniqueness is enforced per tenant database naturally
+        services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+        {
+            options.Password.RequireDigit = true;
+            options.Password.RequiredLength = 6;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireLowercase = true;
+            options.User.RequireUniqueEmail = true;
+        })
+        .AddEntityFrameworkStores<AppDbContext>()
+        .AddDefaultTokenProviders();
+
+        // Redis / memory cache
         if (string.IsNullOrWhiteSpace(redisConnectionString))
         {
             services.AddDistributedMemoryCache();
@@ -45,6 +85,7 @@ public static class DependencyInjection
             });
         }
 
+        // Hangfire (central database)
         services.AddHangfire(configurationBuilder => configurationBuilder
             .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
             .UseSimpleAssemblyNameTypeSerializer()
@@ -64,24 +105,19 @@ public static class DependencyInjection
             services.AddHangfireServer();
         }
 
-        services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-        {
-            options.Password.RequireDigit = true;
-            options.Password.RequiredLength = 6;
-            options.Password.RequireNonAlphanumeric = false;
-            options.Password.RequireUppercase = true;
-            options.Password.RequireLowercase = true;
-            options.User.RequireUniqueEmail = true;
-        })
-        .AddEntityFrameworkStores<AppDbContext>()
-        .AddDefaultTokenProviders();
-
+        // Repositories and services
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<DbInitializer>();
+        services.AddScoped<ITenantRepository, TenantRepository>();
+        services.AddScoped<ITenantConnectionResolver, TenantConnectionResolver>();
         services.AddScoped<ICacheService, RedisCacheService>();
         services.AddScoped<IEmailJobService, EmailJobService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
+
+        // Database initializers
+        services.AddScoped<DbInitializer>();
+        services.AddScoped<TenantDbInitializer>();
+        services.AddScoped<ITenantDbInitializer>(sp => sp.GetRequiredService<TenantDbInitializer>());
 
         return services;
     }

@@ -74,6 +74,6 @@ public sealed class CreateProductCommandHandlerTests
 
         repositoryMock.Verify(repository => repository.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()), Times.Once);
         unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        cacheServiceMock.Verify(cache => cache.RemoveAsync("products:list", It.IsAny<CancellationToken>()), Times.Once);
+        cacheServiceMock.Verify(cache => cache.RemoveAsync($"tenant:{tenantId}:products:list", It.IsAny<CancellationToken>()), Times.Once);
     }
 }

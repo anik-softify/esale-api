@@ -34,8 +34,9 @@ public sealed class RegisterCommandHandler : IRequestHandler<RegisterCommand, Au
 
     public async Task<AuthResponseDto> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
+        var tenantId = _tenantProvider.GetTenantId();
+
         var user = _mapper.Map<ApplicationUser>(request);
-        user.TenantId = _tenantProvider.GetTenantId();
 
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
@@ -45,7 +46,7 @@ public sealed class RegisterCommandHandler : IRequestHandler<RegisterCommand, Au
         }
 
         var token = _jwtTokenService.GenerateToken(
-            user.Id, user.Email!, user.FirstName, user.LastName, user.TenantId);
+            user.Id, user.Email!, user.FirstName, user.LastName, tenantId);
 
         return new AuthResponseDto(token, user.Id, user.Email!, user.FirstName, user.LastName);
     }

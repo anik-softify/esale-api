@@ -48,7 +48,7 @@ public sealed class CreateProductCommandHandler : IRequestHandler<CreateProductC
 
         await _productRepository.AddAsync(product, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        await _cacheService.RemoveAsync("products:list", cancellationToken);
+        await _cacheService.RemoveAsync($"tenant:{product.TenantId}:products:list", cancellationToken);
 
         return product.Id;
     }

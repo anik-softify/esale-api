@@ -22,13 +22,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
-        // Apply all configurations from this assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-
-        // Global tenant query filter — every query is automatically scoped to the current tenant.
-        // This is the simplest and most reliable form of tenant isolation with shared database.
-        modelBuilder.Entity<Product>().HasQueryFilter(p => p.TenantId == _tenantId);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

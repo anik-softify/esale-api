@@ -1,4 +1,5 @@
 using eSale.Application.Common.Caching;
+using eSale.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -8,13 +9,16 @@ public sealed class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRe
     where TRequest : IRequest<TResponse>
 {
     private readonly ICacheService _cacheService;
+    private readonly ITenantProvider _tenantProvider;
     private readonly ILogger<CachingBehavior<TRequest, TResponse>> _logger;
 
     public CachingBehavior(
         ICacheService cacheService,
+        ITenantProvider tenantProvider,
         ILogger<CachingBehavior<TRequest, TResponse>> logger)
     {
         _cacheService = cacheService;
+        _tenantProvider = tenantProvider;
         _logger = logger;
     }
 
@@ -28,16 +32,19 @@ public sealed class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRe
             return await next();
         }
 
-        var cachedResponse = await _cacheService.GetAsync<TResponse>(cacheableQuery.CacheKey, cancellationToken);
+        var tenantId = _tenantProvider.GetTenantId();
+        var scopedKey = $"tenant:{tenantId}:{cacheableQuery.CacheKey}";
+
+        var cachedResponse = await _cacheService.GetAsync<TResponse>(scopedKey, cancellationToken);
         if (cachedResponse is not null)
         {
-            _logger.LogInformation("Cache hit for key {CacheKey}", cacheableQuery.CacheKey);
+            _logger.LogInformation("Cache hit for key {CacheKey}", scopedKey);
             return cachedResponse;
         }
 
-        _logger.LogInformation("Cache miss for key {CacheKey}", cacheableQuery.CacheKey);
+        _logger.LogInformation("Cache miss for key {CacheKey}", scopedKey);
         var response = await next();
-        await _cacheService.SetAsync(cacheableQuery.CacheKey, response, cacheableQuery.Expiration, cancellationToken);
+        await _cacheService.SetAsync(scopedKey, response, cacheableQuery.Expiration, cancellationToken);
         return response;
     }
 }

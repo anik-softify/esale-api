@@ -1,13 +1,12 @@
-using eSale.Application.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
 namespace eSale.Infrastructure.Persistence;
 
-public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
+public sealed class CentralDbContextFactory : IDesignTimeDbContextFactory<CentralDbContext>
 {
-    public AppDbContext CreateDbContext(string[] args)
+    public CentralDbContext CreateDbContext(string[] args)
     {
         var basePath = Directory.GetCurrentDirectory();
         var apiPath = Path.Combine(basePath, "..", "eSale.Api");
@@ -23,15 +22,9 @@ public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
             ?? throw new InvalidOperationException(
                 "Database connection string 'DefaultConnection' is missing.");
 
-        var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+        var optionsBuilder = new DbContextOptionsBuilder<CentralDbContext>();
         optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 
-        return new AppDbContext(optionsBuilder.Options, new DesignTimeTenantProvider());
-    }
-
-    private sealed class DesignTimeTenantProvider : ITenantProvider
-    {
-        public Guid GetTenantId() => Guid.Empty;
-        public string GetConnectionString() => string.Empty;
+        return new CentralDbContext(optionsBuilder.Options);
     }
 }
